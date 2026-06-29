@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChannelIQ — Analytics para creadores de YouTube</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a href="/" class="brand">
+      <span class="brand-dot"></span>
+      ChannelIQ
+    </a>
+    <nav class="nav-links">
+      <a href="#funciones">Funciones</a>
+      <a href="#precios">Precios</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Entrar con Google →</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="shell hero-inner">
+    <div>
+      <div class="eyebrow">Analytics para YouTube</div>
+      <h1>Conoce tu canal.<br><em>Toma mejores decisiones.</em></h1>
+      <p>Conecta tu canal de YouTube y visualiza tus métricas reales: vistas, suscriptores, retención y más. Exporta reportes a Excel y recibe un resumen semanal por email.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Empezar gratis con Google →</a>
+        <a href="#precios" class="btn btn-ghost">Ver planes</a>
+      </div>
+    </div>
+
+    <div class="mock-panel">
+      <div class="mock-head">
+        <div class="mock-dots"><span></span><span></span><span></span></div>
+        <span class="mock-title">channeliq.dashboard</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-metrics">
+          <div class="mock-metric">
+            <div class="mock-metric-val">24.7K</div>
+            <div class="mock-metric-label">Vistas (7 días)</div>
+          </div>
+          <div class="mock-metric">
+            <div class="mock-metric-val">+312</div>
+            <div class="mock-metric-label">Subs ganados</div>
+          </div>
+          <div class="mock-metric">
+            <div class="mock-metric-val">8.4K</div>
+            <div class="mock-metric-label">Min. vistos</div>
+          </div>
+          <div class="mock-metric">
+            <div class="mock-metric-val" style="color:var(--green)">+289</div>
+            <div class="mock-metric-label">Subs netos</div>
+          </div>
+        </div>
+        <div class="mock-bar-chart">
+          <span style="height:40%"></span><span style="height:65%"></span>
+          <span style="height:50%"></span><span style="height:80%"></span>
+          <span style="height:45%"></span><span style="height:90%"></span>
+          <span style="height:60%"></span><span style="height:75%"></span>
+          <span style="height:55%"></span><span style="height:85%"></span>
+          <span style="height:70%"></span><span style="height:95%"></span>
+          <span style="height:65%"></span><span style="height:100%"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="funciones">
+  <div class="shell">
+    <div class="section-tag">Funciones</div>
+    <h2>Todo lo que necesitas para entender tu canal</h2>
+    <p class="lead">Sin exportar manualmente desde YouTube Studio. Todo en un solo lugar.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Métricas en tiempo real</h3>
+        <p>Vistas, minutos vistos, suscriptores ganados y perdidos. Actualizados cada vez que abres el dashboard.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Gráfica de vistas diarias</h3>
+        <p>Visualiza el rendimiento de tu canal día a día. Identifica picos y caídas de forma inmediata.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎬</div>
+        <h3>Rendimiento por video</h3>
+        <p>Vistas, likes y comentarios de cada video. Ordena para encontrar qué contenido funciona mejor.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📥</div>
+        <h3>Exportar a Excel</h3>
+        <p>Reporte completo de 28 días con datos diarios, gráficas y tabla de videos en un solo archivo.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📧</div>
+        <h3>Reporte semanal por email</h3>
+        <p>Recibe un resumen de tu canal cada semana directamente en tu bandeja de entrada. Sin entrar al dashboard.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Solo lectura, siempre</h3>
+        <p>Acceso de solo lectura a tus datos. No publicamos, no modificamos, no tocamos tu canal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="precios">
+  <div class="shell" style="text-align:center">
+    <div class="section-tag">Precios</div>
+    <h2>Simple y transparente</h2>
+    <p class="lead" style="margin:0 auto">Empieza gratis. Actualiza cuando necesites más datos.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-badge">Free</div>
+        <div class="price-amount">$0 <span>/ mes</span></div>
+        <ul class="price-features">
+          <li>Últimos 7 días de datos</li>
+          <li>5 videos más recientes</li>
+          <li>Métricas básicas</li>
+          <li>Gráfica de vistas</li>
+          <li class="na">Exportar a Excel</li>
+          <li class="na">Reporte semanal por email</li>
+          <li class="na">28 días de historial</li>
+        </ul>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-block">Empezar gratis</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Pro</div>
+        <div class="price-amount">$15 <span>/ mes</span></div>
+        <ul class="price-features">
+          <li>Últimos 28 días de datos</li>
+          <li>50 videos con estadísticas</li>
+          <li>Métricas completas</li>
+          <li>Gráfica de vistas</li>
+          <li>Exportar a Excel (con gráficas)</li>
+          <li>Reporte semanal por email</li>
+          <li>Historial de 28 días</li>
+        </ul>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-block">Empezar con Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="shell">
+  <span>ChannelIQ — Analytics para creadores de YouTube</span>
+  <div style="display:flex;gap:1.5rem;">
+    <a href="{{ url_for('auth.login') }}">Entrar</a>
+    <a href="#precios">Precios</a>
+  </div>
+</footer>
+
+</body>
+</html>
