@@ -233,6 +233,9 @@ def checkout_pro():
     try:
         session_obj = stripe.checkout.Session.create(
             payment_method_types=["card"],
+            payment_method_options={
+                "card": {"request_three_d_secure": "automatic"}
+            },
             line_items=[{
                 "price_data": {
                     "currency": "usd",
