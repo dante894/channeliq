@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidad — ChannelIQ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <style>
+    .privacy-content { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .privacy-content h1 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 0.5rem; }
+    .privacy-content h2 { font-family: var(--font-display); font-size: 1.2rem; margin: 2rem 0 0.75rem; color: var(--accent); }
+    .privacy-content p, .privacy-content li { color: var(--text-dim); line-height: 1.8; margin-bottom: 0.75rem; }
+    .privacy-content ul { padding-left: 1.5rem; }
+    .privacy-content a { color: var(--accent); }
+    .last-updated { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); margin-bottom: 2.5rem; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a href="/" class="brand"><span class="brand-dot"></span>ChannelIQ</a>
+    <nav class="nav-links">
+      <a href="/">Inicio</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Entrar</a>
+    </nav>
+  </div>
+</header>
+
+<div class="privacy-content">
+  <h1>Política de Privacidad</h1>
+  <p class="last-updated">Última actualización: 1 de julio de 2026</p>
+
+  <p>Esta Política de Privacidad describe cómo ChannelIQ ("nosotros", "nuestro" o "la aplicación") recopila, usa y protege la información de los usuarios que acceden a nuestro servicio en <strong>channeliq-dtv1.onrender.com</strong>.</p>
+
+  <h2>1. Información que recopilamos</h2>
+  <p>Cuando te registras en ChannelIQ mediante Google OAuth, recopilamos:</p>
+  <ul>
+    <li>Nombre y dirección de correo electrónico de tu cuenta de Google</li>
+    <li>Foto de perfil de tu cuenta de Google</li>
+    <li>Tokens de acceso de OAuth para leer los datos de tu canal de YouTube (solo lectura)</li>
+  </ul>
+  <p>Cuando conectas tu canal de YouTube, accedemos a:</p>
+  <ul>
+    <li>Información pública del canal (nombre, cantidad de suscriptores, cantidad de videos)</li>
+    <li>Métricas de analytics del canal (vistas, minutos vistos, suscriptores ganados/perdidos)</li>
+    <li>Información de videos del canal (título, fecha de publicación, vistas, likes, comentarios)</li>
+  </ul>
+
+  <h2>2. Cómo usamos tu información</h2>
+  <p>Usamos la información recopilada exclusivamente para:</p>
+  <ul>
+    <li>Mostrarte las métricas de tu canal de YouTube en el dashboard</li>
+    <li>Enviarte reportes semanales por email (solo usuarios del plan Pro)</li>
+    <li>Generar exportaciones de datos en formato Excel</li>
+    <li>Gestionar tu cuenta y suscripción</li>
+  </ul>
+  <p><strong>Nunca vendemos, compartimos ni transferimos tu información a terceros</strong>, excepto a los proveedores de servicio necesarios para operar la plataforma (Stripe para pagos, Render para hosting).</p>
+
+  <h2>3. Acceso a datos de YouTube</h2>
+  <p>ChannelIQ utiliza la API de YouTube y la API de YouTube Analytics con acceso de <strong>solo lectura</strong>. Esto significa que:</p>
+  <ul>
+    <li>No podemos publicar, editar ni eliminar contenido en tu canal</li>
+    <li>No podemos modificar la configuración de tu canal</li>
+    <li>Solo leemos métricas y estadísticas de tu propio canal</li>
+  </ul>
+  <p>El uso de los datos obtenidos de las APIs de YouTube está sujeto a la <a href="https://policies.google.com/privacy" target="_blank">Política de Privacidad de Google</a>. Puedes revocar el acceso de ChannelIQ a tu cuenta de Google en cualquier momento desde <a href="https://myaccount.google.com/permissions" target="_blank">myaccount.google.com/permissions</a>.</p>
+
+  <h2>4. Almacenamiento de datos</h2>
+  <p>Tus datos se almacenan en servidores seguros. Los tokens de acceso de OAuth se almacenan de forma encriptada y se utilizan únicamente para obtener datos de tu canal cuando usas el servicio.</p>
+
+  <h2>5. Pagos</h2>
+  <p>Los pagos son procesados por <strong>Stripe</strong>. ChannelIQ no almacena ni tiene acceso a los datos de tu tarjeta de crédito. Stripe maneja toda la información de pago de forma segura y cumple con el estándar PCI DSS.</p>
+
+  <h2>6. Retención de datos</h2>
+  <p>Conservamos tus datos mientras tengas una cuenta activa en ChannelIQ. Si decides eliminar tu cuenta, eliminaremos todos tus datos personales en un plazo de 30 días.</p>
+
+  <h2>7. Tus derechos</h2>
+  <p>Tienes derecho a:</p>
+  <ul>
+    <li>Acceder a los datos que tenemos sobre ti</li>
+    <li>Solicitar la eliminación de tu cuenta y datos</li>
+    <li>Revocar el acceso de ChannelIQ a tu cuenta de Google en cualquier momento</li>
+    <li>Desconectar tu canal de YouTube desde el dashboard</li>
+  </ul>
+
+  <h2>8. Contacto</h2>
+  <p>Si tienes preguntas sobre esta política de privacidad o quieres ejercer tus derechos, contáctanos en: <a href="mailto:trabajon.dante@gmail.com">trabajon.dante@gmail.com</a></p>
+
+  <h2>9. Cambios a esta política</h2>
+  <p>Podemos actualizar esta política ocasionalmente. Te notificaremos por email si realizamos cambios significativos.</p>
+</div>
+
+</body>
+</html>
