@@ -151,7 +151,7 @@
 <script>
   window.CHANNEL_CONNECTED = {{ (channel and channel.channel_id) | tojson }};
   window.IS_PRO = {{ subscription.is_pro | tojson }};
-  window.STRIPE_KEY = {{ stripe_public_key | tojson }};
+  window.MP_PUBLIC_KEY = {{ mp_public_key | tojson }};
 </script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
