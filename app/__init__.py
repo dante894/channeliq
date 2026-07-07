@@ -26,3 +26,8 @@ def create_app(config="config.DevelopmentConfig"):
         app.register_blueprint(bp)
 
     return app
+from app.routes.admin import admin_bp
+    app.register_blueprint(admin_bp)
+    app.config["ADMIN_EMAILS"] = [
+        os.environ.get("ADMIN_EMAIL", "trabajon.dante@gmail.com")
+    ]
