@@ -323,3 +323,32 @@ def payment_success():
             db.session.commit()
 
     return redirect(url_for("main.dashboard") + "?pro=1")
+
+@api_bp.route("/pro-stats")
+@login_required
+def pro_stats_api():
+    if not current_user.is_pro:
+        return jsonify({"error": "Requiere plan Pro", "upgrade": True}), 403
+    token, err, code = _get_token()
+    if err:
+        return err, code
+    ch = current_user.channel
+    try:
+        from app.services import youtube_pro
+        top_videos = youtube_pro.fetch_top_videos_by_views(token, ch.channel_id, 10)
+        traffic = youtube_pro.fetch_traffic_sources(token, ch.channel_id, 28)
+        comparison = youtube_pro.fetch_period_comparison(token, ch.channel_id, 28)
+        retention = youtube_pro.fetch_video_retention(token, ch.channel_id, 5)
+        return jsonify({"top_videos": top_videos, "traffic": traffic,
+                        "comparison": comparison, "retention": retention})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@main_bp.route("/pro-stats")
+@login_required
+def pro_stats_page():
+    if not current_user.is_pro:
+        return redirect(url_for("main.dashboard"))
+    sub = current_user.get_subscription()
+    return render_template("pro_stats.html", subscription=sub)
