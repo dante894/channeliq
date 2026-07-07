@@ -51,6 +51,7 @@
       <div class="channel-bar-actions">
         {% if subscription.is_pro %}
           <button id="export-btn" class="btn btn-ghost">↓ Exportar Excel</button>
+          <a href="{{ url_for('main.pro_stats_page') }}" class="btn btn-ghost">📊 Stats Pro</a>
         {% endif %}
         <button id="refresh-btn" class="btn btn-ghost">↻ Actualizar</button>
       </div>
