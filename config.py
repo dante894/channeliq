@@ -19,11 +19,11 @@ class Config:
     GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
-    # Stripe
-    STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "")
-    STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
-    STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
-    STRIPE_PRO_PRICE_CENTS = 1500  # $15/mes
+    # MercadoPago Argentina
+    MP_ACCESS_TOKEN = os.environ.get("MP_ACCESS_TOKEN", "")
+    MP_PUBLIC_KEY = os.environ.get("MP_PUBLIC_KEY", "")
+    MP_PRO_PRICE_ARS = int(os.environ.get("MP_PRO_PRICE_ARS", "15000"))  # $15.000 ARS/mes
+    MP_IS_TEST = os.environ.get("MP_IS_TEST", "true").lower() == "true"
 
     # Planes
     FREE_DAYS = 7

@@ -3,7 +3,7 @@ import io
 from datetime import datetime, timedelta
 
 import requests
-import stripe
+import mercadopago
 from flask import (Blueprint, redirect, url_for, session, current_app,
                    request, jsonify, render_template, send_file)
 from flask_login import login_user, logout_user, login_required, current_user
@@ -95,7 +95,7 @@ def dashboard():
     return render_template("dashboard.html",
                            subscription=sub,
                            channel=current_user.channel,
-                           stripe_public_key=current_app.config["STRIPE_PUBLIC_KEY"])
+                           mp_public_key=current_app.config["MP_PUBLIC_KEY"])
 
 
 # ── YouTube OAuth ────────────────────────────────────────────────────────────
@@ -227,70 +227,99 @@ def export_excel():
 pay_bp = Blueprint("payments", __name__, url_prefix="/payments")
 
 
-def _stripe():
-    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+def _mp():
+    return mercadopago.SDK(current_app.config["MP_ACCESS_TOKEN"])
 
 
 @pay_bp.route("/checkout-pro", methods=["POST"])
 @login_required
 def checkout_pro():
-    _stripe()
-    try:
-        session_obj = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            payment_method_options={
-                "card": {"request_three_d_secure": "automatic"}
-            },
-            line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {"name": "ChannelIQ Pro — Suscripción mensual"},
-                    "unit_amount": current_app.config["STRIPE_PRO_PRICE_CENTS"],
-                    "recurring": {"interval": "month"},
-                },
-                "quantity": 1,
-            }],
-            mode="subscription",
-            success_url=url_for("main.dashboard", _external=True) + "?pro=1",
-            cancel_url=url_for("main.dashboard", _external=True),
-            metadata={"user_id": current_user.id},
-        )
-    except stripe.error.StripeError as e:
-        return jsonify({"error": str(e)}), 400
-    return jsonify({"checkout_url": session_obj.url})
+    sdk = _mp()
+    precio_ars = current_app.config["MP_PRO_PRICE_ARS"]
+    preference_data = {
+        "items": [{
+            "title": "ChannelIQ Pro — Suscripción mensual",
+            "quantity": 1,
+            "unit_price": precio_ars,
+            "currency_id": "ARS",
+        }],
+        "back_urls": {
+            "success": url_for("main.dashboard", _external=True) + "?pro=1",
+            "failure": url_for("main.dashboard", _external=True) + "?pro=error",
+            "pending": url_for("main.dashboard", _external=True) + "?pro=pending",
+        },
+        "auto_return": "approved",
+        "notification_url": url_for("payments.webhook", _external=True),
+        "external_reference": str(current_user.id),
+        "payment_methods": {
+            "excluded_payment_types": [
+                {"id": "ticket"},
+                {"id": "atm"},
+                {"id": "digital_currency"},
+            ],
+            "installments": 1,
+        },
+    }
+    result = sdk.preference().create(preference_data)
+    if result["status"] != 201:
+        return jsonify({"error": "No se pudo crear el pago."}), 400
+
+    # En prueba usar sandbox_init_point, en producción usar init_point
+    is_test = current_app.config.get("MP_IS_TEST", True)
+    checkout_url = result["response"]["sandbox_init_point"] if is_test else result["response"]["init_point"]
+    return jsonify({"checkout_url": checkout_url})
 
 
 @pay_bp.route("/webhook", methods=["POST"])
 def webhook():
-    _stripe()
-    payload = request.data
-    sig = request.headers.get("Stripe-Signature")
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig, current_app.config["STRIPE_WEBHOOK_SECRET"])
-    except Exception:
-        return jsonify({"error": "Invalid signature"}), 400
+    """MercadoPago notifica aquí cuando ocurre un pago."""
+    topic = request.args.get("topic") or request.args.get("type")
+    resource_id = request.args.get("id") or request.args.get("data.id")
 
-    if event["type"] in ("checkout.session.completed", "invoice.paid"):
-        obj = event["data"]["object"]
-        user_id = obj.get("metadata", {}).get("user_id")
-        if user_id:
-            user = User.query.get(int(user_id))
-            if user:
-                sub = user.get_subscription()
-                sub.plan = "pro"
-                sub.stripe_subscription_id = obj.get("subscription")
-                sub.stripe_customer_id = obj.get("customer")
-                sub.current_period_end = datetime.utcnow() + timedelta(days=31)
-                db.session.commit()
+    if not topic or not resource_id:
+        data = request.get_json(silent=True) or {}
+        topic = data.get("type")
+        resource_id = data.get("data", {}).get("id")
 
-    elif event["type"] == "customer.subscription.deleted":
-        obj = event["data"]["object"]
-        sub = Subscription.query.filter_by(
-            stripe_subscription_id=obj["id"]).first()
-        if sub:
-            sub.plan = "free"
-            sub.current_period_end = None
-            db.session.commit()
+    if topic in ("payment", "merchant_order"):
+        sdk = _mp()
+        try:
+            if topic == "payment":
+                payment = sdk.payment().get(resource_id)
+                if payment["status"] == 200:
+                    p = payment["response"]
+                    if p.get("status") == "approved":
+                        user_id = p.get("external_reference")
+                        if user_id:
+                            user = User.query.get(int(user_id))
+                            if user:
+                                sub = user.get_subscription()
+                                sub.plan = "pro"
+                                sub.current_period_end = datetime.utcnow() + timedelta(days=31)
+                                sub.stripe_subscription_id = str(p.get("id"))
+                                db.session.commit()
+        except Exception as e:
+            current_app.logger.error(f"Error webhook MP: {e}")
 
     return jsonify({"ok": True})
+
+
+@pay_bp.route("/success")
+@login_required
+def payment_success():
+    """MercadoPago redirige aquí tras pago exitoso."""
+    payment_id = request.args.get("payment_id")
+    status = request.args.get("status")
+    external_ref = request.args.get("external_reference")
+
+    if status == "approved" and external_ref:
+        user = User.query.get(int(external_ref))
+        if user and user.id == current_user.id:
+            sub = user.get_subscription()
+            sub.plan = "pro"
+            sub.current_period_end = datetime.utcnow() + timedelta(days=31)
+            if payment_id:
+                sub.stripe_subscription_id = payment_id
+            db.session.commit()
+
+    return redirect(url_for("main.dashboard") + "?pro=1")

@@ -131,8 +131,12 @@
     try {
       const res = await fetch("/payments/checkout-pro", { method: "POST", headers: { "Content-Type": "application/json" } });
       const data = await res.json();
-      if (data.checkout_url) window.location.href = data.checkout_url;
-      else alert(data.error || "Error iniciando pago.");
+      if (data.checkout_url) {
+        // Redirigir a MercadoPago Checkout
+        window.location.href = data.checkout_url;
+      } else {
+        alert(data.error || "Error iniciando pago.");
+      }
     } catch (e) { alert("Error de red."); }
   }
 
