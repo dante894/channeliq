@@ -28,7 +28,7 @@ def create_app(config="config.DevelopmentConfig"):
         app.register_blueprint(bp)
 
     app.config["ADMIN_EMAILS"] = [
-        os.environ.get("ADMIN_EMAIL", "trabajon.dante@gmail.com")
+        os.environ.get("ADMIN_EMAIL", "trabalon.dante@gmail.com")
     ]
 
     return app
