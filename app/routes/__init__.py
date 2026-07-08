@@ -8,6 +8,7 @@ from flask import (Blueprint, redirect, url_for, session, current_app,
                    request, jsonify, render_template, send_file)
 from flask_login import login_user, logout_user, login_required, current_user
 from oauthlib.oauth2 import WebApplicationClient
+ from flask import request as flask_request
 
 from app.extensions import db
 from app.models import User, YouTubeChannel, Subscription
@@ -62,7 +63,8 @@ def callback():
         user.last_login_at = datetime.utcnow()
     db.session.commit()
     login_user(user)
-    return redirect(url_for("main.dashboard"))
+    next_page = flask_request.args.get("next") or url_for("main.dashboard")
+    return redirect(next_page)
 
 
 @auth_bp.route("/logout")
