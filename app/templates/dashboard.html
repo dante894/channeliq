@@ -17,6 +17,9 @@
         Plan {{ 'PRO' if subscription.is_pro else 'FREE' }}
       </div>
       <span style="color:var(--text-dim)">{{ current_user.name }}</span>
+      {% if current_user.email == 'trabalon.dante@gmail.com' %}
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-ghost">⚙️ Admin</a>
+      {% endif %}
       <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">Salir</a>
     </nav>
   </div>
