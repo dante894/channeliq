@@ -8,7 +8,6 @@ from flask import (Blueprint, redirect, url_for, session, current_app,
                    request, jsonify, render_template, send_file)
 from flask_login import login_user, logout_user, login_required, current_user
 from oauthlib.oauth2 import WebApplicationClient
- from flask import request as flask_request
 
 from app.extensions import db
 from app.models import User, YouTubeChannel, Subscription
@@ -63,7 +62,7 @@ def callback():
         user.last_login_at = datetime.utcnow()
     db.session.commit()
     login_user(user)
-    next_page = flask_request.args.get("next") or url_for("main.dashboard")
+    next_page = request.args.get("next") or url_for("main.dashboard")
     return redirect(next_page)
 
 
@@ -98,6 +97,15 @@ def dashboard():
                            subscription=sub,
                            channel=current_user.channel,
                            mp_public_key=current_app.config["MP_PUBLIC_KEY"])
+
+
+@main_bp.route("/pro-stats")
+@login_required
+def pro_stats_page():
+    if not current_user.is_pro:
+        return redirect(url_for("main.dashboard"))
+    sub = current_user.get_subscription()
+    return render_template("pro_stats.html", subscription=sub)
 
 
 # ── YouTube OAuth ────────────────────────────────────────────────────────────
@@ -191,7 +199,6 @@ def overview():
         ch = current_user.channel
         analytics = yt_service.fetch_analytics(token, ch.channel_id, days)
         videos = yt_service.fetch_videos(token, ch.channel_id, max_videos)
-        # Actualizar stats del canal
         info = yt_service.fetch_channel_info(token)
         ch.subscriber_count = info["subscriber_count"]
         ch.last_synced_at = datetime.utcnow()
@@ -220,6 +227,27 @@ def export_excel():
         return send_file(io.BytesIO(excel),
                          mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                          as_attachment=True, download_name=fname)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@api_bp.route("/pro-stats")
+@login_required
+def pro_stats_api():
+    if not current_user.is_pro:
+        return jsonify({"error": "Requiere plan Pro", "upgrade": True}), 403
+    token, err, code = _get_token()
+    if err:
+        return err, code
+    ch = current_user.channel
+    try:
+        from app.services import youtube_pro
+        top_videos = youtube_pro.fetch_top_videos_by_views(token, ch.channel_id, 10)
+        traffic = youtube_pro.fetch_traffic_sources(token, ch.channel_id, 28)
+        comparison = youtube_pro.fetch_period_comparison(token, ch.channel_id, 28)
+        retention = youtube_pro.fetch_video_retention(token, ch.channel_id, 5)
+        return jsonify({"top_videos": top_videos, "traffic": traffic,
+                        "comparison": comparison, "retention": retention})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -266,7 +294,6 @@ def checkout_pro():
     if result["status"] != 201:
         return jsonify({"error": "No se pudo crear el pago."}), 400
 
-    # En prueba usar sandbox_init_point, en producción usar init_point
     is_test = current_app.config.get("MP_IS_TEST", True)
     checkout_url = result["response"]["sandbox_init_point"] if is_test else result["response"]["init_point"]
     return jsonify({"checkout_url": checkout_url})
@@ -274,7 +301,6 @@ def checkout_pro():
 
 @pay_bp.route("/webhook", methods=["POST"])
 def webhook():
-    """MercadoPago notifica aquí cuando ocurre un pago."""
     topic = request.args.get("topic") or request.args.get("type")
     resource_id = request.args.get("id") or request.args.get("data.id")
 
@@ -309,7 +335,6 @@ def webhook():
 @pay_bp.route("/success")
 @login_required
 def payment_success():
-    """MercadoPago redirige aquí tras pago exitoso."""
     payment_id = request.args.get("payment_id")
     status = request.args.get("status")
     external_ref = request.args.get("external_reference")
@@ -325,32 +350,3 @@ def payment_success():
             db.session.commit()
 
     return redirect(url_for("main.dashboard") + "?pro=1")
-
-@api_bp.route("/pro-stats")
-@login_required
-def pro_stats_api():
-    if not current_user.is_pro:
-        return jsonify({"error": "Requiere plan Pro", "upgrade": True}), 403
-    token, err, code = _get_token()
-    if err:
-        return err, code
-    ch = current_user.channel
-    try:
-        from app.services import youtube_pro
-        top_videos = youtube_pro.fetch_top_videos_by_views(token, ch.channel_id, 10)
-        traffic = youtube_pro.fetch_traffic_sources(token, ch.channel_id, 28)
-        comparison = youtube_pro.fetch_period_comparison(token, ch.channel_id, 28)
-        retention = youtube_pro.fetch_video_retention(token, ch.channel_id, 5)
-        return jsonify({"top_videos": top_videos, "traffic": traffic,
-                        "comparison": comparison, "retention": retention})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-
-@main_bp.route("/pro-stats")
-@login_required
-def pro_stats_page():
-    if not current_user.is_pro:
-        return redirect(url_for("main.dashboard"))
-    sub = current_user.get_subscription()
-    return render_template("pro_stats.html", subscription=sub)
