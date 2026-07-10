@@ -16,11 +16,40 @@
     return d.innerHTML;
   }
 
+  function showReconnectBanner(message) {
+    const main = document.querySelector(".dash-layout");
+    if (!main) return;
+    const existing = document.getElementById("reconnect-banner");
+    if (existing) existing.remove();
+
+    const banner = document.createElement("div");
+    banner.id = "reconnect-banner";
+    banner.className = "panel dash-full";
+    banner.innerHTML = `
+      <div class="panel-head"><span>conexión_perdida</span></div>
+      <div class="panel-body" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <p style="color:var(--text-dim);max-width:48ch;">${esc(message || "Tu conexión con YouTube expiró o fue revocada.")}</p>
+        <a href="/youtube/connect" class="btn btn-primary">Reconectar canal con Google →</a>
+      </div>
+    `;
+    main.prepend(banner);
+
+    const videosEl = document.getElementById("videos-list");
+    if (videosEl) videosEl.innerHTML = '<p style="color:var(--text-dim);font-size:0.875rem;">Reconectá tu canal para ver los videos.</p>';
+  }
+
   async function loadData() {
     try {
       const res = await fetch("/api/overview");
       const data = await res.json();
-      if (!res.ok) { console.error(data.error); return; }
+      if (!res.ok) {
+        if (data.reconnect) {
+          showReconnectBanner(data.error);
+        } else {
+          console.error(data.error);
+        }
+        return;
+      }
       renderMetrics(data.analytics.totals, data.analytics.days);
       renderChart(data.analytics.daily, data.analytics.days);
       renderVideos(data.videos);

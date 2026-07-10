@@ -25,6 +25,17 @@
             '<div class="panel"><div class="panel-body locked-panel"><h2>Esta sección es exclusiva de Pro</h2></div></div>';
           return;
         }
+        if (data.reconnect) {
+          document.querySelector(".pro-layout").innerHTML = `
+            <div class="panel">
+              <div class="panel-head"><span>conexión_perdida</span></div>
+              <div class="panel-body locked-panel">
+                <h2>${esc(data.error || "Tu conexión con YouTube expiró o fue revocada.")}</h2>
+                <a href="/youtube/connect" class="btn btn-primary" style="margin-top:1rem;display:inline-flex;">Reconectar canal con Google →</a>
+              </div>
+            </div>`;
+          return;
+        }
         console.error(data.error);
         return;
       }

@@ -9,7 +9,9 @@ YOUTUBE_SCOPES = [
 
 
 class YouTubeAPIError(Exception):
-    pass
+    def __init__(self, message, needs_reconnect=False):
+        super().__init__(message)
+        self.needs_reconnect = needs_reconnect
 
 
 def get_auth_url(client_id, redirect_uri):
@@ -45,7 +47,9 @@ def refresh_token(refresh_tok, client_id, client_secret):
     })
     data = resp.json()
     if "error" in data:
-        raise YouTubeAPIError(data.get("error_description", data["error"]))
+        message = data.get("error_description", data["error"])
+        needs_reconnect = data.get("error") == "invalid_grant"
+        raise YouTubeAPIError(message, needs_reconnect=needs_reconnect)
     return data
 
 

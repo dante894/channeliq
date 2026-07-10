@@ -175,7 +175,7 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 def _get_token():
     ch = current_user.channel
     if not ch or not ch.channel_id:
-        return None, jsonify({"error": "Canal no conectado"}), 400
+        return None, jsonify({"error": "Canal no conectado", "reconnect": True}), 400
     try:
         token = yt_service.get_valid_token(
             ch, current_app.config["GOOGLE_CLIENT_ID"],
@@ -183,6 +183,17 @@ def _get_token():
         )
         return token, None, None
     except yt_service.YouTubeAPIError as e:
+        if e.needs_reconnect:
+            # El refresh token ya no sirve (revocado, expirado, o password
+            # cambiada en Google). Borramos la conexión rota para que el
+            # usuario vea la pantalla de "conectar canal" en vez de un
+            # loop infinito de errores 400 en cada carga.
+            db.session.delete(ch)
+            db.session.commit()
+            return None, jsonify({
+                "error": "Tu conexión con YouTube expiró o fue revocada. Reconectá tu canal.",
+                "reconnect": True,
+            }), 401
         return None, jsonify({"error": str(e)}), 400
 
 
