@@ -3,43 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Estadísticas Pro — ChannelIQ</title>
+  <title>Stats Pro — ChannelIQ</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <style>
-    .pro-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; padding: 2rem 1.5rem 4rem; }
-    .full { grid-column: 1 / -1; }
+    .pro-layout { padding: 2rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .pro-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .pro-header h1 { font-family: var(--font-display); font-size: 1.6rem; }
+    .pro-header p { color: var(--text-dim); font-size: 0.875rem; margin-top: 0.25rem; }
 
-    .comparison-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
-    .comp-card { background: var(--surface); padding: 1.25rem; }
-    .comp-label { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.75rem; }
-    .comp-current { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; color: var(--accent); }
-    .comp-prev { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); margin-top: 0.25rem; }
-    .comp-change { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 600; margin-top: 0.25rem; }
-    .positive { color: var(--green); }
-    .negative { color: var(--red); }
+    .compare-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .compare-card { background: var(--surface); padding: 1.25rem; }
+    .compare-label { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 0.4rem; }
+    .compare-value { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; }
+    .compare-delta { font-family: var(--font-mono); font-size: 0.75rem; margin-top: 0.3rem; display: inline-block; padding: 0.1rem 0.45rem; border-radius: 20px; }
+    .compare-delta.up { color: var(--green); background: rgba(52,211,153,0.12); }
+    .compare-delta.down { color: var(--red); background: rgba(248,113,113,0.12); }
 
-    .traffic-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
-    .traffic-label { font-size: 0.82rem; min-width: 180px; }
-    .traffic-track { flex: 1; height: 8px; background: var(--surface-raised); border-radius: 4px; overflow: hidden; }
-    .traffic-fill { height: 100%; background: var(--accent); border-radius: 4px; }
-    .traffic-pct { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); min-width: 40px; text-align: right; }
+    .traffic-list { display: flex; flex-direction: column; gap: 0.65rem; }
+    .traffic-row { display: grid; grid-template-columns: 160px 1fr 90px; align-items: center; gap: 0.75rem; }
+    .traffic-name { font-size: 0.82rem; color: var(--text); }
+    .traffic-bar-bg { background: var(--surface-raised); border-radius: 20px; height: 8px; overflow: hidden; }
+    .traffic-bar-fill { background: var(--accent); height: 100%; border-radius: 20px; }
+    .traffic-pct { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); text-align: right; }
 
-    .top-video { display: grid; grid-template-columns: 24px 72px 1fr 80px 60px 70px; align-items: center; gap: 0.75rem; border: 1px solid var(--line); border-radius: 4px; padding: 0.6rem 0.75rem; margin-bottom: 0.5rem; }
-    .rank-num { font-family: var(--font-display); font-weight: 700; color: var(--accent); font-size: 1rem; }
-    .video-thumb { width: 72px; height: 40px; object-fit: cover; border-radius: 3px; background: var(--surface-raised); }
-    .video-title { font-size: 0.83rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .video-stat { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); text-align: right; }
-    .video-stat strong { display: block; color: var(--text); }
+    .rank-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .rank-row { display: grid; grid-template-columns: 28px 64px 1fr 70px 60px 70px 70px; align-items: center; gap: 0.75rem; border: 1px solid var(--line); border-radius: 4px; padding: 0.55rem 0.75rem; }
+    .rank-num { font-family: var(--font-mono); color: var(--text-dim); font-size: 0.8rem; }
+    .rank-thumb { width: 64px; height: 36px; object-fit: cover; border-radius: 3px; background: var(--surface-raised); }
+    .rank-title { font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rank-stat { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim); text-align: right; }
+    .rank-stat strong { display: block; color: var(--text); font-size: 0.82rem; }
 
-    .retention-row { display: grid; grid-template-columns: 1fr 80px 100px 100px; align-items: center; gap: 0.75rem; border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem; margin-bottom: 0.5rem; font-size: 0.83rem; }
-    .retention-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .retention-stat { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); text-align: right; }
-    .retention-bar { height: 6px; background: var(--surface-raised); border-radius: 3px; overflow: hidden; margin-top: 0.3rem; }
-    .retention-fill { height: 100%; background: var(--green); border-radius: 3px; }
+    .retention-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .retention-tab { font-family: var(--font-mono); font-size: 0.72rem; padding: 0.4rem 0.75rem; border-radius: 20px; border: 1px solid var(--line); color: var(--text-dim); cursor: pointer; background: transparent; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .retention-tab.active { border-color: var(--accent); color: var(--accent); }
+    .retention-chart-wrap { position: relative; height: 220px; }
 
-    @media(max-width:860px) {
-      .pro-layout { grid-template-columns: 1fr; }
-      .comparison-grid { grid-template-columns: 1fr; }
+    .locked-panel { text-align: center; padding: 3rem 2rem; color: var(--text-dim); }
+
+    @media(max-width:860px){
+      .compare-row { grid-template-columns: 1fr 1fr; }
+      .rank-row { grid-template-columns: 24px 48px 1fr 60px; }
+      .rank-row .rank-stat:nth-child(5),.rank-row .rank-stat:nth-child(6),.rank-row .rank-stat:nth-child(7) { display:none; }
+      .traffic-row { grid-template-columns: 110px 1fr 60px; }
     }
   </style>
 </head>
@@ -49,9 +55,12 @@
   <div class="shell topbar-inner">
     <a href="/" class="brand"><span class="brand-dot"></span>ChannelIQ</a>
     <nav class="nav-links">
-      <a href="{{ url_for('main.dashboard') }}" class="btn btn-ghost">← Dashboard</a>
-      <div class="plan-pill pro"><span class="plan-dot"></span>PRO</div>
+      <div class="plan-pill {{ 'pro' if subscription.is_pro else '' }}">
+        <span class="plan-dot" style="background:{{ 'var(--accent)' if subscription.is_pro else 'var(--text-dim)' }}"></span>
+        Plan {{ 'PRO' if subscription.is_pro else 'FREE' }}
+      </div>
       <span style="color:var(--text-dim)">{{ current_user.name }}</span>
+      <a href="{{ url_for('main.dashboard') }}" class="btn btn-ghost">← Dashboard</a>
       <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">Salir</a>
     </nav>
   </div>
@@ -59,136 +68,61 @@
 
 <main class="shell pro-layout">
 
-  <!-- Comparación de períodos -->
-  <div class="panel full">
-    <div class="panel-head">
-      <span>comparacion_periodos</span>
-      <span id="comp-label" style="color:var(--text-dim);font-size:0.75rem;"></span>
+  <div class="pro-header">
+    <div>
+      <h1>📊 Stats Pro</h1>
+      <p>Análisis avanzado de los últimos 28 días.</p>
     </div>
-    <div class="panel-body" style="padding:1.25rem;">
-      <div class="comparison-grid" id="comp-grid">
-        <div class="comp-card"><div class="comp-label">Cargando...</div></div>
+    <button id="refresh-pro-btn" class="btn btn-ghost">↻ Actualizar</button>
+  </div>
+
+  <!-- Comparación de período -->
+  <div class="panel">
+    <div class="panel-head"><span>comparación_de_período</span><span id="compare-label" style="color:var(--text-dim);font-size:0.75rem;"></span></div>
+    <div class="panel-body" style="padding:0;">
+      <div class="compare-row" id="compare-row">
+        <div class="compare-card"><div class="compare-label">Vistas</div><div class="compare-value">—</div></div>
+        <div class="compare-card"><div class="compare-label">Minutos vistos</div><div class="compare-value">—</div></div>
+        <div class="compare-card"><div class="compare-label">Subs ganados</div><div class="compare-value">—</div></div>
+        <div class="compare-card"><div class="compare-label">Likes</div><div class="compare-value">—</div></div>
       </div>
     </div>
   </div>
 
   <!-- Fuentes de tráfico -->
   <div class="panel">
-    <div class="panel-head"><span>fuentes_de_trafico</span></div>
-    <div class="panel-body" style="padding:1.25rem;">
-      <div id="traffic-list"><p style="color:var(--text-dim)">Cargando...</p></div>
+    <div class="panel-head"><span>fuentes_de_tráfico</span></div>
+    <div class="panel-body">
+      <div class="traffic-list" id="traffic-list">
+        <p style="color:var(--text-dim);font-size:0.875rem;">Cargando…</p>
+      </div>
     </div>
   </div>
 
-  <!-- Retención por video -->
+  <!-- Top videos -->
   <div class="panel">
-    <div class="panel-head"><span>retencion_por_video</span></div>
-    <div class="panel-body" style="padding:1.25rem;">
-      <div id="retention-list"><p style="color:var(--text-dim)">Cargando...</p></div>
+    <div class="panel-head"><span>top_videos_por_vistas</span></div>
+    <div class="panel-body">
+      <div class="rank-list" id="rank-list">
+        <p style="color:var(--text-dim);font-size:0.875rem;">Cargando…</p>
+      </div>
     </div>
   </div>
 
-  <!-- Top videos por vistas -->
-  <div class="panel full">
-    <div class="panel-head"><span>top_videos_por_vistas</span></div>
-    <div class="panel-body" style="padding:1.25rem;">
-      <div id="top-videos-list"><p style="color:var(--text-dim)">Cargando...</p></div>
+  <!-- Retención -->
+  <div class="panel">
+    <div class="panel-head"><span>retención_de_audiencia</span></div>
+    <div class="panel-body">
+      <div class="retention-tabs" id="retention-tabs"></div>
+      <div class="retention-chart-wrap">
+        <canvas id="retention-chart"></canvas>
+      </div>
     </div>
   </div>
 
 </main>
 
-<script>
-function fmt(n) {
-  if (n == null) return "—";
-  if (n >= 1000000) return (n/1000000).toFixed(1)+"M";
-  if (n >= 1000) return (n/1000).toFixed(1)+"K";
-  return n.toLocaleString("es");
-}
-
-function esc(s) {
-  const d = document.createElement("div"); d.textContent = s||""; return d.innerHTML;
-}
-
-function fmtChange(pct) {
-  if (pct === null || pct === undefined) return "";
-  const sign = pct >= 0 ? "+" : "";
-  const cls = pct >= 0 ? "positive" : "negative";
-  return `<span class="${cls}">${sign}${pct}%</span>`;
-}
-
-async function loadAll() {
-  const res = await fetch("/api/pro-stats");
-  if (!res.ok) { console.error("Error cargando stats Pro"); return; }
-  const data = await res.json();
-
-  // Comparación
-  const comp = data.comparison;
-  const compLabel = document.getElementById("comp-label");
-  if (compLabel) compLabel.textContent = `últimos ${comp.days} días vs período anterior`;
-  document.getElementById("comp-grid").innerHTML = `
-    <div class="comp-card">
-      <div class="comp-label">Vistas</div>
-      <div class="comp-current">${fmt(comp.current.views)}</div>
-      <div class="comp-prev">Anterior: ${fmt(comp.previous.views)}</div>
-      <div class="comp-change">${fmtChange(comp.changes.views)} vs período anterior</div>
-    </div>
-    <div class="comp-card">
-      <div class="comp-label">Minutos vistos</div>
-      <div class="comp-current">${fmt(comp.current.minutes)}</div>
-      <div class="comp-prev">Anterior: ${fmt(comp.previous.minutes)}</div>
-      <div class="comp-change">${fmtChange(comp.changes.minutes)} vs período anterior</div>
-    </div>
-    <div class="comp-card">
-      <div class="comp-label">Suscriptores ganados</div>
-      <div class="comp-current">+${fmt(comp.current.subs_gained)}</div>
-      <div class="comp-prev">Anterior: +${fmt(comp.previous.subs_gained)}</div>
-      <div class="comp-change">${fmtChange(comp.changes.subs_gained)} vs período anterior</div>
-    </div>
-  `;
-
-  // Fuentes de tráfico
-  document.getElementById("traffic-list").innerHTML = data.traffic.length
-    ? data.traffic.map(t => `
-      <div class="traffic-bar">
-        <div class="traffic-label">${esc(t.label)}</div>
-        <div class="traffic-track"><div class="traffic-fill" style="width:${t.percentage}%"></div></div>
-        <div class="traffic-pct">${t.percentage}%</div>
-        <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-dim);min-width:50px;text-align:right">${fmt(t.views)}</div>
-      </div>`).join("")
-    : '<p style="color:var(--text-dim)">Sin datos de tráfico disponibles.</p>';
-
-  // Retención
-  document.getElementById("retention-list").innerHTML = data.retention.length
-    ? data.retention.map(v => `
-      <div class="retention-row">
-        <div class="retention-title" title="${esc(v.title)}">${esc(v.title)}</div>
-        <div class="retention-stat"><strong>${fmt(v.views)}</strong>vistas</div>
-        <div class="retention-stat">
-          <strong>${Math.floor(v.avg_duration_seconds/60)}:${String(v.avg_duration_seconds%60).padStart(2,'0')}</strong>
-          duración prom.
-          <div class="retention-bar"><div class="retention-fill" style="width:${v.avg_percentage}%"></div></div>
-        </div>
-        <div class="retention-stat"><strong>${v.avg_percentage}%</strong>retención</div>
-      </div>`).join("")
-    : '<p style="color:var(--text-dim)">Sin datos de retención disponibles.</p>';
-
-  // Top videos
-  document.getElementById("top-videos-list").innerHTML = data.top_videos.length
-    ? data.top_videos.map(v => `
-      <div class="top-video">
-        <div class="rank-num">#${v.rank}</div>
-        <img class="video-thumb" src="${esc(v.thumbnail)}" alt="" loading="lazy">
-        <div class="video-title" title="${esc(v.title)}">${esc(v.title)}</div>
-        <div class="video-stat"><strong>${fmt(v.views)}</strong>vistas</div>
-        <div class="video-stat"><strong>${fmt(v.likes)}</strong>likes</div>
-        <div class="video-stat"><strong>${fmt(v.comments)}</strong>comentarios</div>
-      </div>`).join("")
-    : '<p style="color:var(--text-dim)">Sin videos disponibles.</p>';
-}
-
-loadAll();
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/pro_stats.js') }}"></script>
 </body>
 </html>

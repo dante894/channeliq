@@ -22,7 +22,13 @@ def create_app(config="config.DevelopmentConfig"):
         return User.query.get(int(uid))
 
     from app.routes import auth_bp, main_bp, yt_bp, api_bp, pay_bp
-    for bp in (auth_bp, main_bp, yt_bp, api_bp, pay_bp):
+    from app.routes.admin import admin_bp
+
+    for bp in (auth_bp, main_bp, yt_bp, api_bp, pay_bp, admin_bp):
         app.register_blueprint(bp)
+
+    app.config["ADMIN_EMAILS"] = [
+        os.environ.get("ADMIN_EMAIL", "trabalon.dante@gmail.com")
+    ]
 
     return app
