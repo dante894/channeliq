@@ -35,6 +35,7 @@
     <a href="/" class="brand"><span class="brand-dot"></span>ChannelIQ</a>
     <nav class="nav-links">
       <span style="color:var(--accent);font-family:var(--font-mono);font-size:0.8rem;">ADMIN</span>
+      <a href="{{ url_for('admin.visitors_page') }}" class="btn btn-ghost">👥 Visitantes</a>
       <a href="{{ url_for('main.dashboard') }}" class="btn btn-ghost">← Mi dashboard</a>
       <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">Salir</a>
     </nav>

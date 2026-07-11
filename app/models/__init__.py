@@ -69,6 +69,22 @@ class YouTubeChannel(db.Model):
         }
 
 
+class PageView(db.Model):
+    __tablename__ = "page_views"
+    id = db.Column(db.Integer, primary_key=True)
+    path = db.Column(db.String(255), nullable=False, index=True)
+    referrer = db.Column(db.String(512))
+    referrer_host = db.Column(db.String(255), index=True)
+    user_agent = db.Column(db.String(512))
+    device = db.Column(db.String(16))  # mobile | tablet | desktop | bot
+    ip_address = db.Column(db.String(45))  # IPv4/IPv6 con el último octeto/segmento enmascarado
+    visitor_key = db.Column(db.String(64), index=True)  # hash diario para contar únicos sin guardar IP completa
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    user = db.relationship("User")
+
+
 class Subscription(db.Model):
     __tablename__ = "subscriptions"
     id = db.Column(db.Integer, primary_key=True)

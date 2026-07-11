@@ -27,6 +27,12 @@ def create_app(config="config.DevelopmentConfig"):
     for bp in (auth_bp, main_bp, yt_bp, api_bp, pay_bp, admin_bp):
         app.register_blueprint(bp)
 
+    from app.services.tracking import track_page_view
+
+    @app.before_request
+    def _track_visit():
+        track_page_view(app.config["SECRET_KEY"])
+
     app.config["ADMIN_EMAILS"] = [
         os.environ.get("ADMIN_EMAIL", "trabalon.dante@gmail.com")
     ]
